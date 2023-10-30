@@ -22,12 +22,6 @@ void wheels_move(float speed, float steering)
         R=V;
     }
     
-    if(speed==0){
-        Timer1.pwm(WHEELS_PIN_L, 0); 
-        Timer1.pwm(WHEELS_PIN_R, 0);     
-        return; 
-    }
-    
     if(L>1){L=1;}
     if(L<-1){L=-1;}
     if(R>1){R=1;}
