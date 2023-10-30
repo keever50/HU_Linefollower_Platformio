@@ -4,7 +4,7 @@
 #include <time.h>
 #include <led.h>
 
-#define MAIN_DEBUG
+//#define MAIN_DEBUG
 #define RECOVERY_STEPS  200
 unsigned long get_performance()
 {
@@ -29,11 +29,11 @@ float recover_steering=0;
 void loop() {
 
   //Reset terminal position
-  Serial.print("\e[0J");
-  Serial.print("\e[H");
+  //Serial.print("\e[0J");
+  //Serial.print("\e[H");
 
-  Serial.print("uS per cycle: ");
-  Serial.println(get_performance());
+  //Serial.print("uS per cycle: ");
+  //Serial.println(get_performance());
 
   char IR_sensors[SNIFFER_PINS];
   sniffer_read(IR_sensors);
