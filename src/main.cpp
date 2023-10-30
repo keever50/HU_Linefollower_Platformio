@@ -2,11 +2,7 @@
 #include <sniffer.h>
 #include <wheels.h>
 #include <time.h>
-/*
 
-ss
-
-*/
 #define MAIN_DEBUG
 #define RECOVERY_STEPS  200
 unsigned long get_performance()
