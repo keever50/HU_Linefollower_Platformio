@@ -29,6 +29,6 @@ void loop()
     // debug_show_line(strip_pointer, sensors);
     // leds_show();
 
-    behavior_update(strip_pointer);
+    behavior_update();
 
 }

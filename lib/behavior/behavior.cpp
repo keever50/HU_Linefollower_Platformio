@@ -6,7 +6,10 @@
 #include <led.h>
 #include <debug_leds.cpp>
 
-#define BEHAVE_TRACK_MEMORY_SIZE    300
+//#define BEHAVE_DEBUG_RECOVERY
+
+#define BEHAVE_TRACK_MEMORY_SIZE        300
+#define BEHAVE_POST_RECOVERY_TIME_MS    500
 
 #define BEHAVE_FOLLOW_LINE          0
 #define BEHAVE_LOST                 1
@@ -73,13 +76,15 @@ void behavior_get_track_memory(int addr, char* sensors)
     }
 }
 
-void behavior_update(Adafruit_NeoPixel* strip_pointer)
+void behavior_update( )
 {
     static int state;
     static char lost;
     static int ticks;
     static char recovery_direction;
-    strip_pointer = leds_get_strip();
+    static unsigned long next_memory;
+
+    Adafruit_NeoPixel* strip_pointer = leds_get_strip();
 
     switch(state)
     {
@@ -88,8 +93,15 @@ void behavior_update(Adafruit_NeoPixel* strip_pointer)
             //Sensor update
             char sensors[SNIFFER_PINS];
             sniffer_read(sensors);
-            behavior_set_track_memory(ticks%BEHAVE_TRACK_MEMORY_SIZE,sensors);
-            ticks++;
+
+            //Memory
+            if(millis()>=next_memory)
+            {
+                
+                behavior_set_track_memory(ticks%BEHAVE_TRACK_MEMORY_SIZE,sensors);
+                ticks++;                
+            }
+
 
             leds_update();
 
@@ -113,26 +125,50 @@ void behavior_update(Adafruit_NeoPixel* strip_pointer)
 
         case BEHAVE_LOST: /*Lost behavior*/
         {
-            Serial.println("START");
+            recovery_direction=0;
+            #ifdef BEHAVE_DEBUG_RECOVERY
+                Serial.println("START");
+            #endif
+
             for(int i=0;i<BEHAVE_TRACK_MEMORY_SIZE;i++)
             {
                 char sensors[SNIFFER_PINS];
                 behavior_get_track_memory((ticks-BEHAVE_TRACK_MEMORY_SIZE+i)%BEHAVE_TRACK_MEMORY_SIZE,sensors);
-                behavior_print_sensors(sensors);
+
+                #ifdef BEHAVE_DEBUG_RECOVERY
+                    behavior_print_sensors(sensors);
+                #endif
+
                 if(sensors[0]==1 && sensors[SNIFFER_PINS-1]==0 && recovery_direction==0)
                 {
-                    Serial.print("<-MARK L");
+                    #ifdef BEHAVE_DEBUG_RECOVERY
+                        Serial.print("<-MARK L"); 
+                    #endif
                     recovery_direction=1;
                 }
                 if(sensors[0]==0 && sensors[SNIFFER_PINS-1]==1 && recovery_direction==0)
                 {
-                    Serial.print("<-MARK R");
+                    #ifdef BEHAVE_DEBUG_RECOVERY
+                        Serial.print("<-MARK R"); 
+                    #endif
                     recovery_direction=-1;
                 }  
-                Serial.println("");              
+
+                #ifdef BEHAVE_DEBUG_RECOVERY
+                    Serial.println("");  
+                #endif            
             }
-            Serial.println("END");
+                #ifdef BEHAVE_DEBUG_RECOVERY
+                    Serial.println("END");  
+                #endif       
             state = BEHAVE_RECOVERY;
+
+            //Clear track memory
+            for(int i=0;i<BEHAVE_TRACK_MEMORY_SIZE;i++)
+            {
+                behavior_track_memory[i]=0;
+            }
+
             break;
         }
 
@@ -141,10 +177,15 @@ void behavior_update(Adafruit_NeoPixel* strip_pointer)
             //Sensor update
             char sensors[SNIFFER_PINS];
             sniffer_read(sensors);  
-            float steering = sniffer_get_steering(sensors, &lost);
+            sniffer_get_steering(sensors, &lost);
             if(!lost){
                 wheels_move(0, 0);  
+                state = BEHAVE_FOLLOW_LINE;
+                next_memory=millis()+BEHAVE_POST_RECOVERY_TIME_MS;
                 break;
+            }
+            if(recovery_direction==0){
+                recovery_direction=1;
             }
             wheels_move(0.1, recovery_direction);          
             break;
