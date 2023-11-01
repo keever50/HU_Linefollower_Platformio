@@ -6,7 +6,7 @@ void sniffer_read(char* sensors)
     for(int i=0;i<SNIFFER_PINS;i++)
     {
         int reading=analogRead(i+SNIFFER_STARTPIN);
-        sensors[i]=reading<SNIFFER_TRIGGER;
+        sensors[i]=reading<analogRead(0);
     }
 }
 
@@ -35,16 +35,16 @@ float sniffer_get_steering(const char* sensors, char* lost)
         }
     }     
   
-    if(sensors[SNIFFER_PINS-1]==1 && sensors[0]==0)
-    {
-        R=0;
-        L=4;
-    }
-    if(sensors[SNIFFER_PINS-1]==0 && sensors[0]==1)
-    {
-        L=0;
-        R=4;
-    }
+    // if(sensors[SNIFFER_PINS-1]==1 && sensors[0]==0)
+    // {
+    //     R=0;
+    //     L=4;
+    // }
+    // if(sensors[SNIFFER_PINS-1]==0 && sensors[0]==1)
+    // {
+    //     L=0;
+    //     R=4;
+    // }
 
     //When both R and L reached 4, we know no zeroes have been detected, thus no lines. Therefore it is safe to assume we are lost.
     // Serial.println(L);
