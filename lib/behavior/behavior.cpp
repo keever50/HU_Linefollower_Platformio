@@ -20,6 +20,9 @@
 unsigned char behavior_track_memory[BEHAVE_TRACK_MEMORY_SIZE+1];
 Adafruit_NeoPixel* strip_pointer;
 
+/*
+    This helps printing the line tracking sensor detections.
+*/
 void behavior_print_sensors(const char* sensors)
 {
     Serial.print("[");
@@ -35,6 +38,9 @@ void behavior_print_sensors(const char* sensors)
     Serial.print("]");
 }
 
+/*
+    This will print the binary bits of the input
+*/
 void behavior_print_bits(unsigned char bits)
 {
     unsigned char bits_print=bits;
@@ -52,6 +58,11 @@ void behavior_print_bits(unsigned char bits)
     Serial.println("");  
 }
 
+/*
+    This will store a sensor array as one unsigned char of bits at addr in memory.
+    This is more compact than storing one char per bit, per memory location.
+    Because we are unsigned chars, there is only space for 8 sensors per location.
+*/
 void behavior_set_track_memory(unsigned long addr, const char* sensors)
 {
     unsigned char sensor_bits=0;
@@ -65,6 +76,9 @@ void behavior_set_track_memory(unsigned long addr, const char* sensors)
 
 }
 
+/*
+    This recalls bits from memory and puts them back into the sensor array.
+*/
 void behavior_get_track_memory(unsigned long addr, char* sensors)
 {
     unsigned char sensor_bits = behavior_track_memory[addr];
@@ -90,39 +104,43 @@ void behavior_update( )
     {
         case BEHAVE_FOLLOW_LINE: /*Default line-following behavior*/
         {
-            //Sensor update
+            //Sensor update//
             char sensors[SNIFFER_PINS];
             sniffer_read(sensors);
 
-            //Memory
-            if(millis()>=next_memory)
+            //Memory//
+            if(millis()>=next_memory) /*Some behaviors can delay track recording*/
             {
-                
-                behavior_set_track_memory(ticks%BEHAVE_TRACK_MEMORY_SIZE,sensors);
+                unsigned long address = ticks%BEHAVE_TRACK_MEMORY_SIZE;
+                behavior_set_track_memory(address,sensors); /*Records previous detections in memory as bits*/
                 ticks++;                
             }
 
-
+            //Visuals//
             leds_update();
-
-            //debug
             debug_show_line(strip_pointer, sensors);
             leds_show();
 
-            //Apply steering
+            //Calculate steering//
             float steering = sniffer_get_steering(sensors, &lost);
 
-            //Lost track
+            //Lost track//
             if(lost)
             {
-                state=BEHAVE_LOST;
+                state=BEHAVE_LOST;/*Change behavior by changing switch case state*/
                 wheels_move(0, 0);
                 break;
             }
+
+            //Track is still there//
             wheels_move(0.3, steering);
             break;
         }
 
+        /*
+            In case we lose the line we are tracking, this behavior will recall our previous recorded sensor outputs.
+            This way we can find out where and how we lost track.
+        */
         case BEHAVE_LOST: /*Lost behavior*/
         {
             recovery_direction=0;
@@ -172,6 +190,9 @@ void behavior_update( )
             break;
         }
 
+        /*
+            This is the behavior that will apply the calculated move from BEHAVIOR_LOST till we found the line back.
+        */
         case BEHAVE_RECOVERY:
         {
             //Sensor update
