@@ -3,17 +3,22 @@
 #include <Arduino.h>
 
 #define LED_PIN         6
-#define LED_NUMPIXELS   8
+#define LED_NUMPIXELS   15
 #define LED_DELAY       40
 #define LED_WIDTH       1
 
 Adafruit_NeoPixel pixels(LED_NUMPIXELS, LED_PIN, NEO_GRB + NEO_KHZ800);
 
+Adafruit_NeoPixel *leds_get_strip()
+{
+    return &pixels;
+}
+
 void leds_update()
 {
     
     pixels.begin();
-    pixels.setBrightness(20);
+    pixels.setBrightness(50);
     unsigned long time=millis();
     static unsigned long next_led_update;
     if (time>=next_led_update)
@@ -25,7 +30,7 @@ void leds_update()
             h++;
             i=h%2;
         }
-        pixels.clear();
+        //pixels.clear();
         if(h%2)
         {
             pixels.setPixelColor(LED_NUMPIXELS-i+1, pixels.Color(0, 0, 0));
@@ -53,7 +58,7 @@ void leds_update()
             pixels.setPixelColor(LED_NUMPIXELS-i-1, pixels.Color(0, 0, 255));
             pixels.setPixelColor(i, pixels.Color(255, 0, 0));    
         }
-        pixels.show();
+        //pixels.show();
         i++;
 
     }
@@ -61,6 +66,9 @@ void leds_update()
    
 }
 
-
+void leds_show()
+{
+    pixels.show();
+}
 
 
