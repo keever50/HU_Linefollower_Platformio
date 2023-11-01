@@ -17,7 +17,7 @@
 #define BEHAVE_STOP                 3
 #define BEHAVE_RECOVERY             4
 
-unsigned char behavior_track_memory[BEHAVE_TRACK_MEMORY_SIZE];
+unsigned char behavior_track_memory[BEHAVE_TRACK_MEMORY_SIZE+1];
 Adafruit_NeoPixel* strip_pointer;
 
 void behavior_print_sensors(const char* sensors)
@@ -52,7 +52,7 @@ void behavior_print_bits(unsigned char bits)
     Serial.println("");  
 }
 
-void behavior_set_track_memory(int addr, const char* sensors)
+void behavior_set_track_memory(unsigned long addr, const char* sensors)
 {
     unsigned char sensor_bits=0;
     for(int i=0;i<SNIFFER_PINS;i++)
@@ -65,7 +65,7 @@ void behavior_set_track_memory(int addr, const char* sensors)
 
 }
 
-void behavior_get_track_memory(int addr, char* sensors)
+void behavior_get_track_memory(unsigned long addr, char* sensors)
 {
     unsigned char sensor_bits = behavior_track_memory[addr];
 
@@ -80,7 +80,7 @@ void behavior_update( )
 {
     static int state;
     static char lost;
-    static int ticks;
+    static unsigned long ticks;
     static char recovery_direction;
     static unsigned long next_memory;
 
@@ -119,7 +119,7 @@ void behavior_update( )
                 wheels_move(0, 0);
                 break;
             }
-            wheels_move(0.2, steering);
+            wheels_move(0.3, steering);
             break;
         }
 
