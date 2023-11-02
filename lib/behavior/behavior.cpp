@@ -6,10 +6,11 @@
 #include <led.h>
 #include <debug_leds.cpp>
 
-//#define BEHAVE_DEBUG_RECOVERY
+#define BEHAVE_DEBUG_RECOVERY
 
-#define BEHAVE_TRACK_MEMORY_SIZE        300
+#define BEHAVE_TRACK_MEMORY_SIZE        500
 #define BEHAVE_POST_RECOVERY_TIME_MS    500
+#define BEHAVE_RECOVERY_TIMEOUT_FLIP    1000    
 
 #define BEHAVE_FOLLOW_LINE          0
 #define BEHAVE_LOST                 1
@@ -97,6 +98,7 @@ void behavior_update( )
     static unsigned long ticks;
     static char recovery_direction;
     static unsigned long next_memory;
+    static unsigned long recovery_timerout_next;
 
     Adafruit_NeoPixel* strip_pointer = leds_get_strip();
 
@@ -176,10 +178,9 @@ void behavior_update( )
                     Serial.println("");  
                 #endif            
             }
-                #ifdef BEHAVE_DEBUG_RECOVERY
-                    Serial.println("END");  
-                #endif       
-            state = BEHAVE_RECOVERY;
+            #ifdef BEHAVE_DEBUG_RECOVERY
+                Serial.println("END");  
+            #endif       
 
             //Clear track memory
             for(int i=0;i<BEHAVE_TRACK_MEMORY_SIZE;i++)
@@ -187,7 +188,10 @@ void behavior_update( )
                 behavior_track_memory[i]=0;
             }
 
-            break;
+            recovery_timerout_next = millis()+BEHAVE_RECOVERY_TIMEOUT_FLIP;
+            state = BEHAVE_RECOVERY;
+            //break;
+            //Continue down
         }
 
         /*
@@ -208,6 +212,14 @@ void behavior_update( )
             if(recovery_direction==0){
                 recovery_direction=1;
             }
+
+            //Timeout flip
+            if(millis()>=recovery_timerout_next)
+            {
+                recovery_direction=-recovery_direction;
+                recovery_timerout_next = recovery_timerout_next + BEHAVE_RECOVERY_TIMEOUT_FLIP*2;
+            }
+
             wheels_move(0.1, recovery_direction);          
             break;
         }        
