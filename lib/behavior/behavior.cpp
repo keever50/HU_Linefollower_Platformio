@@ -5,6 +5,7 @@
 #include <wheels.h>
 #include <led.h>
 #include <debug_leds.cpp>
+#include <Ultrasonic.h>
 
 #define BEHAVE_DEBUG_RECOVERY
 
@@ -15,14 +16,21 @@
 #define BEHAVE_POST_RECOVERY_TIME_MS    500
 #define BEHAVE_RECOVERY_TIMEOUT_FLIP    1000    
 
+#define BEHAVE_OBSTACLE_START_CM        15
+#define BEHAVE_ECHO_INTERVAL_MS         100
+
 #define BEHAVE_FOLLOW_LINE          0
 #define BEHAVE_LOST                 1
 #define BEHAVE_OBSTACLE             2
 #define BEHAVE_STOP                 3
 #define BEHAVE_RECOVERY             4
+#define BEHAVE_OBSTACLE_REMOVAL     5
+#define BEHAVE_OBSTACLE_REMOVAL_RES 6
+
 
 unsigned char behavior_track_memory[BEHAVE_TRACK_MEMORY_SIZE+1];
 Adafruit_NeoPixel* strip_pointer;
+Ultrasonic obstacle_sensor(2,3,10000);
 
 /*
     This helps printing the line tracking sensor detections.
@@ -102,6 +110,7 @@ void behavior_update( )
     static char recovery_direction;
     static unsigned long next_memory;
     static unsigned long recovery_timerout_next;
+    static unsigned long next_distance;
 
     Adafruit_NeoPixel* strip_pointer = leds_get_strip();
 
@@ -109,6 +118,21 @@ void behavior_update( )
     {
         case BEHAVE_FOLLOW_LINE: /*Default line-following behavior*/
         {
+            //state = BEHAVE_OBSTACLE; break;
+
+            //Distance update//
+            if(millis()>=next_distance)
+            {
+                next_distance=millis()+BEHAVE_ECHO_INTERVAL_MS;
+                unsigned int dist = obstacle_sensor.read(); 
+                if(dist<=BEHAVE_OBSTACLE_START_CM)
+                {
+                    state = BEHAVE_OBSTACLE;
+                    break;
+                }
+            }
+
+
             //Sensor update//
             char sensors[SNIFFER_PINS];
             sniffer_read(sensors);
@@ -227,6 +251,58 @@ void behavior_update( )
             break;
         }        
         
+        static unsigned long obstacle_removal_time_next;
+        case BEHAVE_OBSTACLE:
+        {
+            wheels_move(0,0);
+            obstacle_removal_time_next=millis()+1000;
+
+            state = BEHAVE_OBSTACLE_REMOVAL;
+        }
+
+        case BEHAVE_OBSTACLE_REMOVAL:
+        {
+            //Move arm OUT
+            static unsigned long next_servo;
+            if(millis()>=next_servo)
+            {
+                next_servo = millis()+20;
+                digitalWrite(12,HIGH);
+                delayMicroseconds(2500);
+                digitalWrite(12,LOW);
+            }
+
+            wheels_move(0.3,1);
+
+            if(millis()>=obstacle_removal_time_next)
+            {
+                state = BEHAVE_OBSTACLE_REMOVAL_RES;
+                obstacle_removal_time_next=obstacle_removal_time_next+1000;
+            }
+
+            break;
+        }
+
+        case BEHAVE_OBSTACLE_REMOVAL_RES:
+        {
+            //Move arm IN
+            static unsigned long next_servo;
+            if(millis()>=next_servo)
+            {
+                next_servo = millis()+20;
+                digitalWrite(12,HIGH);
+                delayMicroseconds(500);
+                digitalWrite(12,LOW);
+            }
+
+            wheels_move(0.3,-1);
+
+            if(millis()>=obstacle_removal_time_next)
+            {
+                state = BEHAVE_FOLLOW_LINE;
+            }
+           
+        }
 
     }
 }

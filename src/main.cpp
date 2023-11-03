@@ -27,24 +27,7 @@ char siren_half = 0;
 unsigned long delta = 0;
 void loop()
 {
-    static unsigned long Th;
-    static unsigned long next_angle;
-    if(millis()>=next_angle)
-    {
-        static char toggle;
-        toggle=!toggle;
-        next_angle = millis()+2000;
-        Th=500+(2000*toggle);
-    }
 
-    static unsigned long next_servo;
-    if(millis()>=next_servo)
-    {
-        next_servo = millis()+20;
-        digitalWrite(12,HIGH);
-        delayMicroseconds(Th);
-        digitalWrite(12,LOW);
-    }
 
     
     unsigned long delta_start;
