@@ -8,6 +8,9 @@
 
 #define BEHAVE_DEBUG_RECOVERY
 
+#define BEHAVE_SPEED                    0.3
+#define BEHAVE_STEERING_MULTIPLIER      1.2
+
 #define BEHAVE_TRACK_MEMORY_SIZE        300
 #define BEHAVE_POST_RECOVERY_TIME_MS    500
 #define BEHAVE_RECOVERY_TIMEOUT_FLIP    1000    
@@ -135,7 +138,7 @@ void behavior_update( )
             }
 
             //Track is still there//
-            wheels_move(0.3, steering);
+            wheels_move(BEHAVE_SPEED, steering*BEHAVE_STEERING_MULTIPLIER);
             break;
         }
 
