@@ -14,18 +14,18 @@
 
 #define BEHAVE_TRACK_MEMORY_SIZE        300
 #define BEHAVE_POST_RECOVERY_TIME_MS    500
-#define BEHAVE_RECOVERY_TIMEOUT_FLIP    1000    
+#define BEHAVE_RECOVERY_TIMEOUT_FLIP    750
 
 #define BEHAVE_OBSTACLE_START_CM        15
 #define BEHAVE_ECHO_INTERVAL_MS         100
 
-#define BEHAVE_FOLLOW_LINE          0
-#define BEHAVE_LOST                 1
-#define BEHAVE_OBSTACLE             2
-#define BEHAVE_STOP                 3
-#define BEHAVE_RECOVERY             4
-#define BEHAVE_OBSTACLE_REMOVAL     5
-#define BEHAVE_OBSTACLE_REMOVAL_RES 6
+#define BEHAVE_FOLLOW_LINE              0
+#define BEHAVE_LOST                     1
+#define BEHAVE_OBSTACLE                 2
+#define BEHAVE_STOP                     3
+#define BEHAVE_RECOVERY                 4
+#define BEHAVE_OBSTACLE_REMOVAL         5
+#define BEHAVE_OBSTACLE_REMOVAL_RES     6
 
 
 unsigned char behavior_track_memory[BEHAVE_TRACK_MEMORY_SIZE+1];
@@ -247,7 +247,7 @@ void behavior_update( )
                 recovery_timerout_next = recovery_timerout_next + BEHAVE_RECOVERY_TIMEOUT_FLIP*2;
             }
 
-            wheels_move(0.1, recovery_direction);          
+            wheels_move(0.3, recovery_direction);          
             break;
         }        
         
