@@ -6,6 +6,7 @@
 #include <led.h>
 #include <debug_leds.cpp>
 #include <Ultrasonic.h>
+#include <arm.h>
 
 #define BEHAVE_DEBUG_RECOVERY
 
@@ -263,14 +264,8 @@ void behavior_update( )
         case BEHAVE_OBSTACLE_REMOVAL:
         {
             //Move arm OUT
-            static unsigned long next_servo;
-            if(millis()>=next_servo)
-            {
-                next_servo = millis()+20;
-                digitalWrite(12,HIGH);
-                delayMicroseconds(2500);
-                digitalWrite(12,LOW);
-            }
+            arm_set_angle(180);
+        
 
             wheels_move(0.3,1);
 
@@ -286,14 +281,7 @@ void behavior_update( )
         case BEHAVE_OBSTACLE_REMOVAL_RES:
         {
             //Move arm IN
-            static unsigned long next_servo;
-            if(millis()>=next_servo)
-            {
-                next_servo = millis()+20;
-                digitalWrite(12,HIGH);
-                delayMicroseconds(500);
-                digitalWrite(12,LOW);
-            }
+            arm_set_angle(0);
 
             wheels_move(0.3,-1);
 
