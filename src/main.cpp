@@ -19,6 +19,9 @@ void setup()
     pinMode(7, OUTPUT);
     
     pinMode(12, OUTPUT);
+
+    pinMode(2,OUTPUT);
+    pinMode(3,INPUT);
     //strip_pointer = leds_get_strip();
 }
 
