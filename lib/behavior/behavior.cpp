@@ -7,6 +7,7 @@
 #include <debug_leds.cpp>
 #include <Ultrasonic.h>
 #include <arm.h>
+#include <echo.h>
 
 #define BEHAVE_DEBUG_RECOVERY
 
@@ -105,7 +106,7 @@ void behavior_get_track_memory(unsigned long addr, char* sensors)
 
 void behavior_update( )
 {
-    static int state;
+    
     static char lost;
     static unsigned long ticks;
     static char recovery_direction;
@@ -115,6 +116,7 @@ void behavior_update( )
 
     Adafruit_NeoPixel* strip_pointer = leds_get_strip();
 
+    static int state;
     switch(state)
     {
         case BEHAVE_FOLLOW_LINE: /*Default line-following behavior*/
@@ -125,7 +127,7 @@ void behavior_update( )
             if(millis()>=next_distance)
             {
                 next_distance=millis()+BEHAVE_ECHO_INTERVAL_MS;
-                unsigned int dist = obstacle_sensor.read(); 
+                double dist = echo();//obstacle_sensor.read(); 
                 if(dist<=BEHAVE_OBSTACLE_START_CM)
                 {
                     state = BEHAVE_OBSTACLE;
