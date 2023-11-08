@@ -7,5 +7,5 @@ Adafruit_NeoPixel *leds_get_strip();
 
 void leds_update();
 void leds_show();
-
+void leds_update2();
 #endif
