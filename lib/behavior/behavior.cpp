@@ -12,7 +12,7 @@
 #define BEHAVE_DEBUG_RECOVERY
 
 #define BEHAVE_SPEED                    0.3
-#define BEHAVE_STEERING_MULTIPLIER      1.1
+#define BEHAVE_STEERING_MULTIPLIER      1.0
 
 #define BEHAVE_TRACK_MEMORY_SIZE        300
 #define BEHAVE_POST_RECOVERY_TIME_MS    500
@@ -149,7 +149,8 @@ void behavior_update( )
             }
 
             //Visuals//
-            leds_update();
+            //leds_update();
+            leds_update2();
             debug_show_line(strip_pointer, sensors);
             leds_show();
 
@@ -265,6 +266,8 @@ void behavior_update( )
 
         case BEHAVE_OBSTACLE_REMOVAL:
         {
+            leds_update();
+            leds_show();
             //Move arm OUT
             arm_set_angle(180);
         
@@ -282,6 +285,8 @@ void behavior_update( )
 
         case BEHAVE_OBSTACLE_REMOVAL_RES:
         {
+            leds_update();
+            leds_show();            
             //Move arm IN
             arm_set_angle(0);
 

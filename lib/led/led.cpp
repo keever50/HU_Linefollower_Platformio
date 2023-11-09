@@ -3,9 +3,9 @@
 #include <Arduino.h>
 
 #define LED_PIN         6
-#define LED_NUMPIXELS   8
-#define LED_DELAY       40
-#define LED_DELAY2      10
+#define LED_NUMPIXELS   15
+#define LED_DELAY       50
+#define LED_DELAY2      5
 #define LED_WIDTH       1
 
 Adafruit_NeoPixel pixels(LED_NUMPIXELS, LED_PIN, NEO_GRB + NEO_KHZ800);
@@ -74,6 +74,7 @@ void leds_show()
 
 void leds_update2()
 {  
+
     pixels.setBrightness(50);
     pixels.begin();
     static long firstPixelHue;
@@ -87,8 +88,12 @@ void leds_update2()
         int rand_pix = random(0, LED_NUMPIXELS);
         int rand_hue = random(-5000,5000);
         pixels.setPixelColor(rand_pix,pixels.ColorHSV((firstPixelHue+rand_hue),rand_sat,rand_bri));
-        firstPixelHue += 100;
+        firstPixelHue += 500;
+
+        
     }
     if(firstPixelHue>65536) firstPixelHue=0;
-    pixels.show();
+    //pixels.show();
+
+   
 }
